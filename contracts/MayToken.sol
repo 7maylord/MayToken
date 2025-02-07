@@ -2,9 +2,9 @@
 pragma solidity ^0.8.28;
 
 contract MayToken {
-    string public name = "MayToken";
-    string public symbol = "MAY";
-    uint8 public decimals = 18;
+    string public name;
+    string public symbol;
+    uint8 public decimals;
     uint public totalSupply;
     address public owner;
 
@@ -21,8 +21,11 @@ contract MayToken {
         _;
     }
 
-    constructor(uint256 _initialSupply) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _initialSupply) {
         owner = msg.sender;
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
         totalSupply = _initialSupply * 10 ** uint256(decimals);
         balanceOf[msg.sender] = totalSupply;
     }
@@ -31,15 +34,14 @@ contract MayToken {
         require(_to != address(0), "Invalid address");
         require(balanceOf[msg.sender] >= _value, "Not enough funds");
         
-        unchecked {
-            balanceOf[msg.sender] -= _value;
-            balanceOf[_to] += _value;
-        }
+        balanceOf[msg.sender] -= _value;
+        balanceOf[_to] += _value;
 
         emit Transfer(msg.sender, _to, _value);
         return true;
     }
 
+    // cross check with dbe
     function approve(address _spender, uint _value) public returns (bool success) {
         require(_spender != address(0), "Invalid address");
         allowance[msg.sender][_spender] = _value;
@@ -47,16 +49,16 @@ contract MayToken {
         return true;
     }
 
+    //check again
     function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
         require(_to != address(0), "Invalid address");
         require(balanceOf[_from] >= _value, "Not enough funds");
         require(allowance[_from][msg.sender] >= _value, "Allowance exceeded");
 
-        unchecked {
-            balanceOf[_from] -= _value;
-            balanceOf[_to] += _value;
-            allowance[_from][msg.sender] -= _value;
-        }
+        balanceOf[_from] -= _value;
+        balanceOf[_to] += _value;
+        allowance[_from][msg.sender] -= _value;
+        
 
         emit Transfer(_from, _to, _value);
         return true;
@@ -73,9 +75,7 @@ contract MayToken {
         require(_spender != address(0), "Invalid address");
         require(allowance[msg.sender][_spender] >= _subtractedValue, "Allowance too low");
 
-        unchecked {
-            allowance[msg.sender][_spender] -= _subtractedValue;
-        }
+        allowance[msg.sender][_spender] -= _subtractedValue;
 
         emit Approval(msg.sender, _spender, allowance[msg.sender][_spender]);
         return true;
@@ -84,24 +84,20 @@ contract MayToken {
     function burn(uint _value) public returns (bool success) {
         require(balanceOf[msg.sender] >= _value, "Not enough funds");
 
-        unchecked {
-            balanceOf[msg.sender] -= _value;
-            totalSupply -= _value;
-        }
-
-        emit Burn(msg.sender, _value);
+        balanceOf[msg.sender] -= _value;
+        totalSupply -= _value;
+        
         emit Transfer(msg.sender, address(0), _value);
+        emit Burn(msg.sender, _value);
         return true;
     }
 
     function mint(address _to, uint _value) public onlyOwner returns (bool success) {
         require(_to != address(0), "Invalid address");
 
-        unchecked {
-            totalSupply += _value;
-            balanceOf[_to] += _value;
-        }
-
+        totalSupply += _value;
+        balanceOf[_to] += _value;
+        
         emit Mint(_to, _value);
         emit Transfer(address(0), _to, _value);
         return true;
