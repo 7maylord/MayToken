@@ -15,6 +15,8 @@ MayToken is a simple ERC-20-like token implemented in Solidity. It supports basi
 - **Decimals**: 18
 - **Total Supply**: Set during deployment
 - **Owner**: The contract deployer
+- **Contract Address**: 0xda4B11A190A8B30e367080651e905c0B5D3Ab8C6
+- **Token Address**: https://sepolia.basescan.org/token/0xda4b11a190a8b30e367080651e905c0b5d3ab8c6
 
 ## Functions
 

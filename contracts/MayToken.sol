@@ -5,16 +5,16 @@ contract MayToken {
     string public name;
     string public symbol;
     uint8 public decimals;
-    uint public totalSupply;
+    uint256 public totalSupply;
     address public owner;
 
-    mapping(address => uint) public balanceOf;
-    mapping(address => mapping(address => uint)) public allowance;
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
-    event Burn(address indexed from, uint value);
-    event Mint(address indexed to, uint value);
+    event Burn(address indexed from, uint256 value);
+    event Mint(address indexed to, uint256 value);
     
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the contract owner");
@@ -26,11 +26,14 @@ contract MayToken {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
-        totalSupply = _initialSupply * 10 ** uint256(decimals);
+        totalSupply = _initialSupply * 10 ** uint8(decimals);
         balanceOf[msg.sender] = totalSupply;
+
+        emit Transfer(address(0), msg.sender, totalSupply);
     }
 
-    function transfer(address _to, uint _value) public returns (bool success) {
+    
+    function transfer(address _to, uint256 _value) public returns (bool success) {
         require(_to != address(0), "Invalid address");
         require(balanceOf[msg.sender] >= _value, "Not enough funds");
         
@@ -41,16 +44,15 @@ contract MayToken {
         return true;
     }
 
-    // cross check with dbe
-    function approve(address _spender, uint _value) public returns (bool success) {
+    function approve(address _spender, uint256 _value) public returns (bool success) {
         require(_spender != address(0), "Invalid address");
+        require(balanceOf[msg.sender] >= _value, "Not enough funds");
         allowance[msg.sender][_spender] = _value;
         emit Approval(msg.sender, _spender, _value);
         return true;
     }
 
-    //check again
-    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
         require(_to != address(0), "Invalid address");
         require(balanceOf[_from] >= _value, "Not enough funds");
         require(allowance[_from][msg.sender] >= _value, "Allowance exceeded");
@@ -59,19 +61,19 @@ contract MayToken {
         balanceOf[_to] += _value;
         allowance[_from][msg.sender] -= _value;
         
-
         emit Transfer(_from, _to, _value);
         return true;
     }
 
-    function increaseAllowance(address _spender, uint _addedValue) public returns (bool success) {
+   
+    function increaseAllowance(address _spender, uint256 _addedValue) public returns (bool success) {
         require(_spender != address(0), "Invalid address");
         allowance[msg.sender][_spender] += _addedValue;
         emit Approval(msg.sender, _spender, allowance[msg.sender][_spender]);
         return true;
     }
 
-    function decreaseAllowance(address _spender, uint _subtractedValue) public returns (bool success) {
+    function decreaseAllowance(address _spender, uint256 _subtractedValue) public returns (bool success) {
         require(_spender != address(0), "Invalid address");
         require(allowance[msg.sender][_spender] >= _subtractedValue, "Allowance too low");
 
@@ -81,7 +83,7 @@ contract MayToken {
         return true;
     }
 
-    function burn(uint _value) public returns (bool success) {
+    function burn(uint256 _value) public returns (bool success) {
         require(balanceOf[msg.sender] >= _value, "Not enough funds");
 
         balanceOf[msg.sender] -= _value;
@@ -92,7 +94,7 @@ contract MayToken {
         return true;
     }
 
-    function mint(address _to, uint _value) public onlyOwner returns (bool success) {
+    function mint(address _to, uint256 _value) public onlyOwner returns (bool success) {
         require(_to != address(0), "Invalid address");
 
         totalSupply += _value;
